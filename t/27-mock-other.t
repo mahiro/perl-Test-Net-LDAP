@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 19;
 
 use Test::Net::LDAP::Mock::Data;
 
@@ -12,6 +12,18 @@ my $data = Test::Net::LDAP::Mock::Data->new;
 $data->bind_ok();
 $data->unbind_ok();
 $data->abandon_ok();
+
+# Root DSE
+$data->mock_root_dse(
+	namingContexts => 'dc=example,dc=com',
+	supportedLDAPVersion => 3,
+	subschemaSubentry => 'cn=Subscheme',
+);
+
+ok my $root_dse = $data->root_dse;
+is($root_dse->get_value('namingContexts'), 'dc=example,dc=com');
+is($root_dse->get_value('supportedLDAPVersion'), 3);
+is($root_dse->get_value('subschemaSubentry'), 'cn=Subscheme');
 
 # Callback - bind
 my @callback_args;

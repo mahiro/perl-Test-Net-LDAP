@@ -197,7 +197,31 @@ C<delete>.
 
 sub mock_schema {
 	my $self = shift;
-	$self->schema(@_);
+	$self->mock_data->schema(@_);
+}
+
+=head2 mock_root_dse
+
+Gets or sets the root DSE (L<Net::LDAP::RootDSE>) for the currently associated
+data tree.
+
+This should be set up as part of the test fixture before any successive call to
+the C<root_dse()> method, since L<Net::LDAP> will cache the returned object.
+
+    $ldap->mock_root_dse(
+        namingContexts => 'dc=example,dc=com'
+    );
+
+Note: the namingContexts value has no effect on the restriction with the
+topmost DN. In other words, even if namingContexts is set to
+'dc=example,dc=com', the C<add()> method still allows you to add an entry to
+'dc=somewhere-else'.
+
+=cut
+
+sub mock_root_dse {
+	my $self = shift;
+	$self->mock_data->mock_root_dse(@_);
 }
 
 =head2 search

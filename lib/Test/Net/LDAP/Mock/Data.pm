@@ -18,6 +18,7 @@ use Net::LDAP::FilterMatch;
 use Net::LDAP::Util qw(
 	canonical_dn escape_dn_value ldap_explode_dn
 );
+use Scalar::Util qw(blessed);
 use Test::Net::LDAP::Util;
 
 my %scope = qw(base  0 one    1 single 1 sub    2 subtree 2);
@@ -70,6 +71,44 @@ sub ldap {
 		return $ldap;
 	} else {
 		return $self->{ldap};
+	}
+}
+
+sub root_dse {
+	my $self = shift;
+	$self->ldap->root_dse(@_);
+}
+
+sub mock_root_dse {
+	my $self = shift;
+	my $root_node = $self->root;
+	
+	if (@_) {
+		require Net::LDAP::RootDSE;
+		my $old_entry = $root_node->entry;
+		my $new_entry;
+		
+		if ($_[0] && blessed($_[0]) && $_[0]->isa('Net::LDAP::Entry')) {
+			$new_entry = $_[0]->clone;
+			$new_entry->dn('');
+			
+			unless ($new_entry->isa('Net::LDAP::RootDSE')) {
+				bless $new_entry, 'Net::LDAP::RootDSE';
+			}
+		} else {
+			$new_entry = Net::LDAP::RootDSE->new('', @_);
+		}
+		
+		unless ($new_entry->get_value('objectClass')) {
+			$new_entry->add(objectClass => 'top');
+			# Net::LDAP::root_dse uses the filter '(objectclass=*)' to search
+			# for the root DSE.
+		}
+		
+		$root_node->entry($new_entry);
+		return $old_entry;
+	} else {
+		return $root_node->entry;
 	}
 }
 
