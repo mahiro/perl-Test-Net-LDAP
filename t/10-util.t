@@ -5,11 +5,11 @@ use warnings;
 use Test::More tests => 8;
 
 use Net::LDAP::Constant qw(
-	LDAP_SUCCESS LDAP_NO_SUCH_OBJECT LDAP_ALREADY_EXISTS
+    LDAP_SUCCESS LDAP_NO_SUCH_OBJECT LDAP_ALREADY_EXISTS
 );
 use Test::Net::LDAP::Mock;
 use Test::Net::LDAP::Util qw(
-	ldap_result_ok ldap_result_is
+    ldap_result_ok ldap_result_is
 );
 
 # Result - status code only
@@ -29,16 +29,16 @@ ldap_result_is($mesg, LDAP_ALREADY_EXISTS);
 
 # Export
 {
-	package TestPackage1;
-	use Test::Net::LDAP::Util qw(ldap_result_is);
+    package TestPackage1;
+    use Test::Net::LDAP::Util qw(ldap_result_is);
 }
 
 ok(TestPackage1->can('ldap_result_is'));
 ok(!TestPackage1->can('ldap_result_ok'));
 
 {	
-	package TestPackage2;
-	use Test::Net::LDAP::Util qw(:all);
+    package TestPackage2;
+    use Test::Net::LDAP::Util qw(:all);
 }
 
 ok(TestPackage2->can('ldap_result_is'));

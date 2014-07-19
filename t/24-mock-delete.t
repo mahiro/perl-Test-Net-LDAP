@@ -5,10 +5,10 @@ use warnings;
 use Test::More tests => 35;
 
 use Net::LDAP::Constant qw(
-	LDAP_SUCCESS
-	LDAP_PARAM_ERROR
-	LDAP_INVALID_DN_SYNTAX
-	LDAP_NO_SUCH_OBJECT
+    LDAP_SUCCESS
+    LDAP_PARAM_ERROR
+    LDAP_INVALID_DN_SYNTAX
+    LDAP_NO_SUCH_OBJECT
 );
 use Net::LDAP::Entry;
 use Test::Net::LDAP::Mock::Data;
@@ -19,20 +19,20 @@ my @entries;
 
 # Prepare user1, user2, user3
 $data->add_ok('uid=user1, dc=example, dc=com', attrs => [
-	uid => 'user1',
+    uid => 'user1',
 ]);
 
 $data->add_ok('uid=user2, dc=example, dc=com', attrs => [
-	uid => 'user2',
+    uid => 'user2',
 ]);
 
 $data->add_ok('uid=user3, dc=example, dc=com', attrs => [
-	uid => 'user3',
+    uid => 'user3',
 ]);
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'one',
-	filter => '(uid=*)', attrs => [qw(uid)],
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=*)', attrs => [qw(uid)],
 );
 
 is(scalar($search->entries), 3);
@@ -48,8 +48,8 @@ is($entries[2]->get_value('uid'), 'user3');
 $data->delete_ok('uid=user2, dc=example, dc=com');
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'one',
-	filter => '(uid=*)', attrs => [qw(uid)],
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=*)', attrs => [qw(uid)],
 );
 
 is(scalar($search->entries), 2);
@@ -63,8 +63,8 @@ is($entries[1]->get_value('uid'), 'user3');
 $data->delete_ok('uid=user1, dc=example, dc=com');
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'one',
-	filter => '(uid=*)', attrs => [qw(uid)],
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=*)', attrs => [qw(uid)],
 );
 
 is(scalar($search->entries), 1);
@@ -76,8 +76,8 @@ is($entries[0]->get_value('uid'), 'user3');
 $data->delete_ok('uid=user3, dc=example, dc=com');
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'one',
-	filter => '(uid=*)', attrs => [qw(uid)],
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=*)', attrs => [qw(uid)],
 );
 
 is(scalar($search->entries), 0);
@@ -87,9 +87,9 @@ $data->add_ok('uid=cb1, dc=example, dc=com');
 my @callback_args;
 
 my $mesg = $data->delete_ok('uid=cb1, dc=example, dc=com',
-	callback => sub {
-		push @callback_args, \@_;
-	}
+    callback => sub {
+        push @callback_args, \@_;
+    }
 );
 
 is(scalar(@callback_args), 1);

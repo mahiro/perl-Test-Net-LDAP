@@ -15,9 +15,9 @@ $data->abandon_ok();
 
 # Root DSE
 $data->mock_root_dse(
-	namingContexts => 'dc=example,dc=com',
-	supportedLDAPVersion => 3,
-	subschemaSubentry => 'cn=Subscheme',
+    namingContexts => 'dc=example,dc=com',
+    supportedLDAPVersion => 3,
+    subschemaSubentry => 'cn=Subscheme',
 );
 
 ok my $root_dse = $data->root_dse;
@@ -32,7 +32,7 @@ my $mesg;
 @callback_args = ();
 
 $mesg = $data->bind_ok(callback => sub {
-	push @callback_args, \@_;
+    push @callback_args, \@_;
 });
 
 is(scalar(@callback_args), 1);
@@ -43,7 +43,7 @@ cmp_ok($callback_args[0][0], '==', $mesg);
 @callback_args = ();
 
 $mesg = $data->unbind_ok(callback => sub {
-	push @callback_args, \@_;
+    push @callback_args, \@_;
 });
 
 is(scalar(@callback_args), 1);
@@ -54,7 +54,7 @@ cmp_ok($callback_args[0][0], '==', $mesg);
 @callback_args = ();
 
 $mesg = $data->abandon_ok(callback => sub {
-	push @callback_args, \@_;
+    push @callback_args, \@_;
 });
 
 is(scalar(@callback_args), 1);

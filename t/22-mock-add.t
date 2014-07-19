@@ -5,10 +5,10 @@ use warnings;
 use Test::More tests => 31;
 
 use Net::LDAP::Constant qw(
-	LDAP_SUCCESS
-	LDAP_PARAM_ERROR
-	LDAP_INVALID_DN_SYNTAX
-	LDAP_ALREADY_EXISTS
+    LDAP_SUCCESS
+    LDAP_PARAM_ERROR
+    LDAP_INVALID_DN_SYNTAX
+    LDAP_ALREADY_EXISTS
 );
 use Net::LDAP::Entry;
 use Net::LDAP::Util qw(canonical_dn);
@@ -20,13 +20,13 @@ my $search;
 
 # Add an entry
 $data->add_ok('uid=user1, dc=example, dc=com', attrs => [
-	sn => 'User',
-	cn => 'One',
+    sn => 'User',
+    cn => 'One',
 ]);
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'one',
-	filter => '(uid=*)', attrs => [qw(uid sn cn)],
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=*)', attrs => [qw(uid sn cn)],
 );
 
 is(scalar($search->entries), 1);
@@ -37,18 +37,18 @@ is($search->entry->get_value('cn'), 'One');
 
 # Add more entries
 $data->add_ok('uid=user2, dc=example, dc=com', attrs => [
-	sn => 'User',
-	cn => 'Two',
+    sn => 'User',
+    cn => 'Two',
 ]);
 
 $data->add_ok('uid=user3, dc=example, dc=com', attrs => [
-	sn => 'User',
-	cn => 'Three',
+    sn => 'User',
+    cn => 'Three',
 ]);
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'one',
-	filter => '(uid=*)', attrs => [qw(uid sn cn)],
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=*)', attrs => [qw(uid sn cn)],
 );
 
 is(scalar($search->entries), 3);
@@ -71,9 +71,9 @@ is($entries[2]->get_value('cn'), 'Three');
 my @callback_args;
 
 my $mesg = $data->add_ok('uid=user4, dc=example, dc=com',
-	callback => sub {
-		push @callback_args, \@_;
-	}
+    callback => sub {
+        push @callback_args, \@_;
+    }
 );
 
 is(scalar(@callback_args), 1);
@@ -82,19 +82,19 @@ cmp_ok($callback_args[0][0], '==', $mesg);
 
 # Error: dn is missing
 $data->add_is([attrs => [
-	cn => 'Test']
+    cn => 'Test']
 ], LDAP_PARAM_ERROR);
 
 # Error: dn is invalid
 $data->add_is(['invalid', attrs => [
-	cn => 'Test'
+    cn => 'Test'
 ]], LDAP_INVALID_DN_SYNTAX);
 
 $data->add_is([dn => 'invalid', attrs => [
-	cn => 'Test'
+    cn => 'Test'
 ]], LDAP_INVALID_DN_SYNTAX);
 
 # Error: Attempt to add a duplicate
 $data->add_is(['uid=user1, dc=example, dc=com', attrs => [
-	cn => 'Test'
+    cn => 'Test'
 ]], LDAP_ALREADY_EXISTS);

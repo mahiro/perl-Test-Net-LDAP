@@ -5,8 +5,8 @@ use warnings;
 use Test::More tests => 70;
 
 use Net::LDAP::Constant qw(
-	LDAP_SUCCESS LDAP_NO_SUCH_OBJECT
-	LDAP_PARAM_ERROR LDAP_INVALID_DN_SYNTAX
+    LDAP_SUCCESS LDAP_NO_SUCH_OBJECT
+    LDAP_PARAM_ERROR LDAP_INVALID_DN_SYNTAX
 );
 use Test::Net::LDAP::Mock::Data;
 
@@ -17,28 +17,28 @@ my $attrs;
 
 # Prepare entries
 $data->add_ok('uid=user1, ou=abc, dc=example, dc=com', attrs => [
-	cn => 'foo',
-	sn => 'user',
+    cn => 'foo',
+    sn => 'user',
 ]);
 
 $data->add_ok('uid=user2, ou=abc, dc=example, dc=com', attrs => [
-	cn => 'bar',
-	sn => 'user',
+    cn => 'bar',
+    sn => 'user',
 ]);
 
 $data->add_ok('uid=user3, ou=def, dc=example, dc=com', attrs => [
-	cn => 'foo',
-	sn => 'user',
+    cn => 'foo',
+    sn => 'user',
 ]);
 
 $data->add_ok('uid=user4, ou=def, dc=example, dc=com', attrs => [
-	cn => 'bar',
-	sn => 'user',
+    cn => 'bar',
+    sn => 'user',
 ]);
 
 # scope => 'base'
 $search = $data->search_ok(
-	base => 'uid=user1, ou=abc, dc=example, dc=com', scope => 'base'
+    base => 'uid=user1, ou=abc, dc=example, dc=com', scope => 'base'
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -48,7 +48,7 @@ is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
 
 # scope => 'one'
 $search = $data->search_ok(
-	base => 'ou=abc, dc=example, dc=com', scope => 'one'
+    base => 'ou=abc, dc=example, dc=com', scope => 'one'
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -58,8 +58,8 @@ is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
 is($entries->[1]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
 
 $search = $data->search_ok(
-	base => 'ou=abc, dc=example, dc=com', scope => 'one',
-	filter => '(cn=bar)'
+    base => 'ou=abc, dc=example, dc=com', scope => 'one',
+    filter => '(cn=bar)'
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -69,7 +69,7 @@ is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
 
 # scope => 'sub'
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'sub'
+    base => 'dc=example, dc=com', scope => 'sub'
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -81,8 +81,8 @@ is($entries->[2]->dn, 'uid=user3,ou=def,dc=example,dc=com');
 is($entries->[3]->dn, 'uid=user4,ou=def,dc=example,dc=com');
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'sub',
-	filter => '(cn=bar)'
+    base => 'dc=example, dc=com', scope => 'sub',
+    filter => '(cn=bar)'
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -93,8 +93,8 @@ is($entries->[1]->dn, 'uid=user4,ou=def,dc=example,dc=com');
 
 # All attributes
 $search = $data->search_ok(
-	base => 'ou=abc, dc=example, dc=com', scope => 'one',
-	filter => '(uid=user1)'
+    base => 'ou=abc, dc=example, dc=com', scope => 'one',
+    filter => '(uid=user1)'
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -112,8 +112,8 @@ is($entries->[0]->get_value('uid'), 'user1');
 
 # Limited attributes
 $search = $data->search_ok(
-	base => 'ou=abc, dc=example, dc=com', scope => 'one',
-	filter => '(uid=user1)', attrs => [qw(cn sn)],
+    base => 'ou=abc, dc=example, dc=com', scope => 'one',
+    filter => '(uid=user1)', attrs => [qw(cn sn)],
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
@@ -132,11 +132,11 @@ is($entries->[0]->get_value('uid'), undef);
 my @callback_args;
 
 $search = $data->search_ok(
-	base => 'dc=example, dc=com', scope => 'sub',
-	filter => '(cn=foo)', attrs => [qw(cn sn)],
-	callback => sub {
-		push @callback_args, \@_;
-	},
+    base => 'dc=example, dc=com', scope => 'sub',
+    filter => '(cn=foo)', attrs => [qw(cn sn)],
+    callback => sub {
+        push @callback_args, \@_;
+    },
 );
 
 is(scalar(@callback_args), 3);
@@ -169,5 +169,5 @@ $data->search_is([filter => undef], LDAP_SUCCESS);
 
 # Error: base dn does not exist
 $data->search_is([
-	base => 'ou=invalid, dc=example, dc=com', scope => 'one',
+    base => 'ou=invalid, dc=example, dc=com', scope => 'one',
 ], LDAP_NO_SUCH_OBJECT);
