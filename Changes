@@ -1,5 +1,9 @@
 Revision history for Test-Net-LDAP
 
+0.03    2014-07-19
+        Support array ref as the hostnames for Net::LDAP->new()
+        https://rt.cpan.org/Ticket/Display.html?id=96932
+
 0.02    2013-07-07
         Add support for root_dse
 
