@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 35;
+use Test::More tests => 40;
 
 use Net::LDAP;
 use Test::Net::LDAP::Util qw(ldap_mockify);
@@ -102,6 +102,21 @@ ldap_mockify {
 ldap_mockify {
     # ldap1 (again)
     for my $ldap (Net::LDAP->new('ldap1.example.com')) {
+        is ref($ldap), 'Test::Net::LDAP::Mock';
+        
+        my $search = $ldap->search_ok(scope => 'sub', filter => '(uid=*)');
+        is scalar($search->entries), 2;
+        
+        my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
+        is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
+        is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
+    }
+};
+
+ldap_mockify {
+    # Net::LDAP->new() can take an array ref as hostnames.
+    # In that case, the first one should be used.
+    for my $ldap (Net::LDAP->new(['ldap1.example.com', 'ldap2.example.com'])) {
         is ref($ldap), 'Test::Net::LDAP::Mock';
         
         my $search = $ldap->search_ok(scope => 'sub', filter => '(uid=*)');

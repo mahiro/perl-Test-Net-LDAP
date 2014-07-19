@@ -142,6 +142,13 @@ sub _mock_target {
     my $host = shift if @_ % 2;
     my $arg = &Net::LDAP::_options;
     my $scheme = $arg->{scheme} || 'ldap';
+
+    # Net::LDAP->new() can take an array ref as hostnames, where
+    # the first host that we can connect to will be used.
+    # For the mock object, let's just pick the first one.
+    if (ref $host) {
+        $host = $host->[0] || '';
+    }
     
     if (length $host) {
         if ($scheme ne 'ldapi' && $host !~ /:\d+$/) {
