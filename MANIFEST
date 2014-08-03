@@ -20,4 +20,5 @@ t/23-mock-modify.t
 t/24-mock-delete.t
 t/25-mock-moddn.t
 t/26-mock-compare.t
-t/27-mock-other.t
+t/27-mock-bind.t
+t/28-mock-other.t

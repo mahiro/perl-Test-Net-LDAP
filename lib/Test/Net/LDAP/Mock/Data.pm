@@ -34,6 +34,9 @@ sub new {
         root => Test::Net::LDAP::Mock::Node->new,
         ldap => $ldap,
         schema => undef,
+        bind_success => 0,
+        mock_bind_code => LDAP_SUCCESS,
+        mock_bind_message => '',
     }, $class;
     
     $self->{ldap} ||= do {
@@ -112,6 +115,18 @@ sub mock_root_dse {
     }
 }
 
+sub mock_bind {
+    my ($self, $code, $message) = @_;
+    my @values = ($self->{mock_bind_code}, $self->{mock_bind_message});
+    
+    if (@_) {
+        $self->{mock_bind_code} = $code;
+        $self->{mock_bind_message} = $message;
+    }
+    
+    return wantarray ? @values : $values[0];
+}
+
 sub _result_entry {
     my ($self, $input_entry, $arg) = @_;
     my $attrs = $arg->{attrs} || [];
@@ -148,10 +163,30 @@ sub bind {
     require Net::LDAP::Bind;
     my $mesg = $self->_mock_message('Net::LDAP::Bind' => $arg);
     
+    if (my $code = $self->{mock_bind_code}) {
+        my $message = $self->{mock_bind_message} || '';
+        
+        if (ref $code eq 'CODE') {
+            # Callback
+            my @result = $code->($arg);
+            ($code, $message) = ($result[0] || LDAP_SUCCESS, $result[1] || $message);
+        }
+        
+        if (blessed $code) {
+            # Assume $code is a LDAP::Message
+            ($code, $message) = ($code->code, $message || $code->error);
+        }
+        
+        if ($code != LDAP_SUCCESS) {
+            return $self->_error($mesg, $code, $message);
+        }
+    }
+    
     if (my $callback = $arg->{callback}) {
         $callback->($mesg);
     }
     
+    $self->{bind_success} = 1;
     return $mesg;
 }
 
@@ -164,6 +199,7 @@ sub unbind {
         $callback->($mesg);
     }
     
+    $self->{bind_success} = 0;
     return $mesg;
 }
 
