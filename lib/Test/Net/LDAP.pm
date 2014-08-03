@@ -19,6 +19,8 @@ our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
+Basic testing utility
+
     use Test::More tests => 1;
     use Test::Net::LDAP;
     
@@ -27,6 +29,23 @@ our $VERSION = '0.03';
     
     # Same as $ldap->search(), testing the result to see if it is success
     my $search = $ldap->search_ok(...search args...);
+
+Mocking (See L<Test::Net::LDAP::Mock>)
+
+    use Test::More tests => 1;
+    use Test::Net::LDAP::Util qw(ldap_mockify);
+    
+    ldap_mockify {
+        # Net::LDAP->new() will invoke Test::Net::LDAP::Mock->new()
+        my $ldap = Net::LDAP->new('ldap.example.com');
+        
+        # Add entries to in-memory data tree
+        $ldap->add('uid=user1, ou=users, dc=example, dc=com');
+        $ldap->add('uid=user2, ou=users, dc=example, dc=com');
+        
+        # Test your application
+        ok my_application_routine();
+    };
 
 =head1 DESCRIPTION
 
@@ -56,21 +75,10 @@ Creates a new object. The parameters are the same as C<Net::LDAP::new>.
 
 =head2 search_ok
 
-=head2 compare_ok
-
-=head2 add_ok
-
-=head2 modify_ok
-
-=head2 delete_ok
-
-=head2 moddn_ok
-
-=head2 bind_ok
-
-=head2 unbind_ok
-
-=head2 abandon_ok
+Available methods:
+C<search_ok>, C<compare_ok>,
+C<add_ok>, C<modify_ok>, C<delete_ok>, C<moddn_ok>,
+C<bind_ok>, C<unbind_ok>, C<abandon_ok>
 
 Synopsis:
 
@@ -99,21 +107,10 @@ automatically configured based on C<$method> and C<@params>.
 
 =head2 search_is
 
-=head2 compare_is
-
-=head2 add_is
-
-=head2 modify_is
-
-=head2 delete_is
-
-=head2 moddn_is
-
-=head2 bind_is
-
-=head2 unbind_is
-
-=head2 abandon_is
+Available methods:
+C<search_is>, C<compare_is>,
+C<add_is>, C<modify_is>, C<delete_is>, C<moddn_is>,
+C<bind_is>, C<unbind_is>, C<abandon_is>
 
 Synopsis:
 
