@@ -11,6 +11,7 @@ use Net::LDAP::Constant qw(
     LDAP_COMPARE_TRUE LDAP_COMPARE_FALSE
     LDAP_NO_SUCH_OBJECT LDAP_ALREADY_EXISTS
     LDAP_INVALID_DN_SYNTAX LDAP_PARAM_ERROR
+    LDAP_INVALID_CREDENTIALS LDAP_INAPPROPRIATE_AUTH
 );
 use Net::LDAP::Entry;
 use Net::LDAP::Filter;
@@ -35,6 +36,7 @@ sub new {
         ldap => $ldap,
         schema => undef,
         bind_success => 0,
+        password_mocked => 0,
         mock_bind_code => LDAP_SUCCESS,
         mock_bind_message => '',
     }, $class;
@@ -116,15 +118,30 @@ sub mock_root_dse {
 }
 
 sub mock_bind {
-    my ($self, $code, $message) = @_;
+    my $self = shift;
     my @values = ($self->{mock_bind_code}, $self->{mock_bind_message});
     
     if (@_) {
-        $self->{mock_bind_code} = $code;
-        $self->{mock_bind_message} = $message;
+        $self->{mock_bind_code} = shift;
+        $self->{mock_bind_message} = shift;
     }
     
     return wantarray ? @values : $values[0];
+}
+
+sub mock_password {
+    my $self = shift;
+    my $dn = shift or return;
+    
+    if (@_) {
+        my $password = shift;
+        $self->{password_mocked} = 1;
+        my $node = $self->root->make_node($dn);
+        return $node->password($password);
+    } else {
+        my $node = $self->root->get_node($dn) or return;
+        return $node->password();
+    }
 }
 
 sub _result_entry {
@@ -163,6 +180,25 @@ sub bind {
     require Net::LDAP::Bind;
     my $mesg = $self->_mock_message('Net::LDAP::Bind' => $arg);
     
+    if ($self->{password_mocked} && exists $arg->{password}) {
+        my $dn = $arg->{dn};
+        
+        if (!defined $dn) {
+            return $self->_error($mesg, LDAP_INAPPROPRIATE_AUTH, 'No password, did you mean noauth or anonymous ?');
+        }
+        
+        $dn = ldap_explode_dn($dn, casefold => 'lower')
+            or return $self->_error($mesg, LDAP_INVALID_DN_SYNTAX, 'invalid DN');
+        
+        my $node = $self->root->get_node($dn)
+            or return $self->_error($mesg, LDAP_NO_SUCH_OBJECT, '');
+        
+        unless (defined $node->password && defined $arg->{password}
+                && $node->password eq $arg->{password}) {
+            return $self->_error($mesg, LDAP_INVALID_CREDENTIALS, '');
+        }
+    }
+    
     if (my $code = $self->{mock_bind_code}) {
         my $message = $self->{mock_bind_message} || '';
         
@@ -186,7 +222,6 @@ sub bind {
         $callback->($mesg);
     }
     
-    $self->{bind_success} = 1;
     return $mesg;
 }
 
@@ -199,7 +234,6 @@ sub unbind {
         $callback->($mesg);
     }
     
-    $self->{bind_success} = 0;
     return $mesg;
 }
 

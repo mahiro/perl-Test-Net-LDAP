@@ -268,6 +268,27 @@ sub mock_bind {
     $self->mock_data->mock_bind(@_);
 }
 
+=head2 mock_password
+
+Gets or sets the password for the simple password authentication with C<bind()>.
+
+    $ldap->mock_password('uid=test, dc=example, dc=com' => 'test_password');
+    # Caution: Passwords should usually *not* be hard-coded like this. Consider to load
+    # passwords from a config file, etc.
+
+The passwords are stored with the entry node in the data tree.
+
+Once this method is used, the C<bind()> call will check the credentials whenever the
+C<password> parameter is passed. Anonymous binding and all the other authentication
+methods are not affected.
+
+=cut
+
+sub mock_password {
+    my $self = shift;
+    $self->mock_data->mock_password(@_);
+}
+
 =head2 search
 
 Searches for entries in the currently associated data tree.

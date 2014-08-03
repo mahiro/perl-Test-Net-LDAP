@@ -9,7 +9,12 @@ use Scalar::Util qw(blessed);
 
 sub new {
     my ($class) = @_;
-    return bless {entry => undef, submap => {}}, $class;
+    
+    return bless {
+        entry    => undef,
+        submap   => {},
+        password => undef,
+    }, $class;
 }
 
 sub entry {
@@ -61,6 +66,13 @@ sub traverse {
     };
     
     $visit->($self, 0);
+}
+
+sub password {
+    my $self = shift;
+    my $password = $self->{password};
+    $self->{password} = shift if @_;
+    return $password;
 }
 
 sub _descend_path {

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 32;
+use Test::More tests => 47;
 
 use Net::LDAP::Constant qw(
     LDAP_SUCCESS LDAP_NO_SUCH_OBJECT
@@ -21,10 +21,12 @@ $data->bind_ok();
 
 # Set code & message
 $data->mock_bind(LDAP_INVALID_CREDENTIALS, 'mock_bind error');
+is($data->mock_bind(), LDAP_INVALID_CREDENTIALS);
 my $mesg = $data->bind();
 is($mesg->code, LDAP_INVALID_CREDENTIALS);
 is($mesg->error, 'mock_bind error');
 $data->mock_bind(LDAP_SUCCESS);
+is($data->mock_bind(), LDAP_SUCCESS);
 $data->bind_ok();
 
 # Set Net::LDAP::Message
@@ -111,5 +113,21 @@ is($mesg->error, 'mock_bind callback error');
 $data->mock_bind(LDAP_SUCCESS);
 $data->bind_ok();
 
+# Bind with password should succeed until some passwords are mocked
+is($data->mock_password('cn=test1, dc=example, dc=com'), undef);
+$data->bind_ok();
+$data->bind_ok(['cn=test1,dc=example,dc=com', password => 'test1_password']);
+$data->bind_ok(['cn=test2,dc=example,dc=com', password => 'wrong_password']);
+$data->bind_ok(['cn=test3,dc=example,dc=com', password => 'any_password']);
 
-
+# Set passwords
+$data->mock_password('cn=test1, dc=example, dc=com' => 'test1_password');
+$data->mock_password('cn=test2, dc=example, dc=com' => 'test2_password');
+is($data->mock_password('cn=test1, dc=example, dc=com'), 'test1_password');
+is($data->mock_password('cn=test2, dc=example, dc=com'), 'test2_password');
+is($data->mock_password('cn=test3, dc=example, dc=com'), undef);
+$data->bind_ok(); # anonymous bind should succeed
+$data->bind_ok(['cn=test1,dc=example,dc=com', password => 'test1_password']);
+$data->bind_is(['cn=test2,dc=example,dc=com', password => 'wrong_password'], LDAP_INVALID_CREDENTIALS);
+$data->bind_is(['cn=test3,dc=example,dc=com', password => 'any_password'], LDAP_NO_SUCH_OBJECT);
+$data->bind_is([password => 'any_password'], LDAP_INAPPROPRIATE_AUTH);
