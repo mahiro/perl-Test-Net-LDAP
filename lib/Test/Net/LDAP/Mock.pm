@@ -18,16 +18,17 @@ Test::Net::LDAP::Mock - A mock LDAP client with simulated search in memory
 
 =head1 SYNOPSIS
 
-C<Test::Net::LDAP::Mock> is a subclass of L<Test::Net::LDAP>, which is
-a subclass of L<Net::LDAP>.
 All the LDAP operations are performed in memory, instead of connecting to the
 real LDAP server.
 
     use Test::Net::LDAP::Mock;
     my $ldap = Test::Net::LDAP::Mock->new();
 
-In practice, it is recommended to use L<Test::Net::LDAP::Util/ldap_mockify> as
-below.
+C<Test::Net::LDAP::Mock> is a subclass of L<Test::Net::LDAP>, which is
+a subclass of L<Net::LDAP>.
+
+In the actual test code, L<Test::Net::LDAP::Util/ldap_mockify> should be used to mock
+all the C<Net::LDAP> instances in your application code.
 
     use Test::More tests => 1;
     use Test::Net::LDAP::Util qw(ldap_mockify);
