@@ -231,6 +231,42 @@ sub mock_root_dse {
     $self->mock_data->mock_root_dse(@_);
 }
 
+=head2 mock_bind
+
+Gets or sets a LDAP result code (and optionally a message) that will be used as a message
+returned by a later C<bind()> call.
+
+    use Net::LDAP::Constant qw(LDAP_INVALID_CREDENTIALS);
+    $ldap->mock_bind(LDAP_INVALID_CREDENTIALS);
+    $ldap->mock_bind(LDAP_INVALID_CREDENTIALS, 'Login failed');
+    # ...
+    my $mesg = $ldap->bind(...);
+    $mesg->code && die $mesg->error; #=> die('Login failed')
+
+In the list context, it returns an array of the code and message. In the scalar
+context, it returns the code only.
+
+Alternatively, this method can take a callback subroutine:
+
+    $ldap->mock_bind(sub {
+        my $arg = shift;
+        # Validate $arg->{dn} and $arg->{password}, etc.
+        if (...invalid credentials...) {
+            return LDAP_INVALID_CREDENTIALS;
+        }
+    });
+
+The callback can return a single value as the LDAP result code or an array in the form
+C<($code, $message)>. If the callback returns nothing (or C<undef>), it is regarded as
+C<LDAP_SUCCESS>.
+
+=cut
+
+sub mock_bind {
+    my $self = shift;
+    $self->mock_data->mock_bind(@_);
+}
+
 =head2 search
 
 Searches for entries in the currently associated data tree.
@@ -336,7 +372,8 @@ sub moddn {
 
 =head2 bind
 
-Does nothing except for returning a success message.
+Returns an expected result message if the bind result has previously been setup by the
+C<mock_bind()> method. Otherwise, a success message is returned.
 
 =cut
 
@@ -347,7 +384,7 @@ sub bind {
 
 =head2 unbind
 
-Does nothing except for returning a success message.
+Returns a success message.
 
 =cut
 
@@ -358,7 +395,7 @@ sub unbind {
 
 =head2 abandon
 
-Does nothing except for returning a success message.
+Returns a success message.
 
 =cut
 
