@@ -1,5 +1,9 @@
 Revision history for Test-Net-LDAP
 
+0.04    2014-08-03
+        Add mock_bind and mock_password
+        https://github.com/mahiro/perl-Test-Net-LDAP/issues/1
+
 0.03    2014-07-19
         Support array ref as the hostnames for Net::LDAP->new()
         https://rt.cpan.org/Ticket/Display.html?id=96932
