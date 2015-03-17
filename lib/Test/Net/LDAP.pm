@@ -11,11 +11,11 @@ Test::Net::LDAP - A Net::LDAP subclass for testing
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -222,7 +222,7 @@ L<http://search.cpan.org/dist/Test-Net-LDAP/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2013 Mahiro Ando.
+Copyright 2013-2015 Mahiro Ando.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

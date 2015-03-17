@@ -1,5 +1,9 @@
 Revision history for Test-Net-LDAP
 
+0.05    2015-03-18
+        Bugfix with case-insensitive DN
+        Add mock_target to normalize scheme://host:port
+
 0.04    2014-08-03
         Add mock_bind and mock_password
         https://github.com/mahiro/perl-Test-Net-LDAP/issues/1
