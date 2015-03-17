@@ -12,6 +12,7 @@ use Net::LDAP::Constant qw(
 );
 use Net::LDAP::Entry;
 use Test::Net::LDAP::Mock::Data;
+use Test::Net::LDAP::Util qw(ldap_dn_is);
 
 my $data = Test::Net::LDAP::Mock::Data->new;
 my $search;
@@ -30,7 +31,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('myattr1')], ['value1.1']);
 is_deeply([$search->entry->get_value('myattr2')], ['value2.1', 'value2.2']);
 
@@ -45,7 +46,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('myattr1')], ['value1.1', 'value1.2']);
 is_deeply([$search->entry->get_value('myattr2')], ['value2.1', 'value2.2', 'value2.3']);
 
@@ -60,7 +61,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('myattr1')], ['value1.1', 'value1.2']);
 is_deeply([$search->entry->get_value('myattr2')], ['value2.4']);
 is_deeply([$search->entry->get_value('myattr3')], ['value3.1', 'value3.2']);
@@ -76,7 +77,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('myattr1')], ['value1.1', 'value1.2']);
 is_deeply([$search->entry->get_value('myattr2')], ['value2.4']);
 is_deeply([$search->entry->get_value('myattr3')], ['value3.3', 'value3.4']);
@@ -93,7 +94,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is($search->entry->get_value('myattr1'), undef);
 is($search->entry->get_value('myattr2'), undef);
 is_deeply([$search->entry->get_value('myattr3')], ['value3.3', 'value3.4']);
@@ -110,7 +111,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is($search->entry->get_value('myattr1'), undef);
 is($search->entry->get_value('myattr2'), undef);
 is_deeply([$search->entry->get_value('myattr3')], ['value3.3']);
@@ -131,7 +132,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('mynum1')], [122]);
 is_deeply([$search->entry->get_value('mynum2')], [255, 355]);
 
@@ -146,7 +147,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('mynum1')], [111]);
 is_deeply([$search->entry->get_value('mynum2')], [233, 333]);
 
@@ -172,7 +173,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is_deeply([$search->entry->get_value('a1')], ['v1.1', 'v1.2']);
 is_deeply([$search->entry->get_value('a2')], ['v2.1']);
 is_deeply([$search->entry->get_value('r1')], ['v1.3']);

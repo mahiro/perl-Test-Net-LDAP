@@ -9,6 +9,7 @@ use Net::LDAP::Constant qw(
     LDAP_PARAM_ERROR LDAP_INVALID_DN_SYNTAX
 );
 use Test::Net::LDAP::Mock::Data;
+use Test::Net::LDAP::Util qw(ldap_dn_is);
 
 my $data = Test::Net::LDAP::Mock::Data->new;
 my $search;
@@ -44,7 +45,7 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 1);
 is(scalar(@$entries), 1);
-is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
 
 # scope => 'one'
 $search = $data->search_ok(
@@ -54,8 +55,8 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 2);
 is(scalar(@$entries), 2);
-is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
-is($entries->[1]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[1]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
 
 $search = $data->search_ok(
     base => 'ou=abc, dc=example, dc=com', scope => 'one',
@@ -65,7 +66,7 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 1);
 is(scalar(@$entries), 1);
-is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
 
 # scope => 'sub'
 $search = $data->search_ok(
@@ -75,10 +76,10 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 4);
 is(scalar(@$entries), 4);
-is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
-is($entries->[1]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
-is($entries->[2]->dn, 'uid=user3,ou=def,dc=example,dc=com');
-is($entries->[3]->dn, 'uid=user4,ou=def,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[1]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[2]->dn, 'uid=user3,ou=def,dc=example,dc=com');
+ldap_dn_is($entries->[3]->dn, 'uid=user4,ou=def,dc=example,dc=com');
 
 $search = $data->search_ok(
     base => 'dc=example, dc=com', scope => 'sub',
@@ -88,8 +89,8 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 2);
 is(scalar(@$entries), 2);
-is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
-is($entries->[1]->dn, 'uid=user4,ou=def,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[1]->dn, 'uid=user4,ou=def,dc=example,dc=com');
 
 # All attributes
 $search = $data->search_ok(
@@ -100,7 +101,7 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 1);
 is(scalar(@$entries), 1);
-is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
 $attrs = [sort $entries->[0]->attributes];
 is(scalar(@$attrs), 3);
 is($attrs->[0], 'cn');
@@ -119,7 +120,7 @@ $search = $data->search_ok(
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 1);
 is(scalar(@$entries), 1);
-is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
 $attrs = [sort $entries->[0]->attributes];
 is(scalar(@$attrs), 2);
 is($attrs->[0], 'cn');

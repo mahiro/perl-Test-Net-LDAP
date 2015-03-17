@@ -13,6 +13,7 @@ use Net::LDAP::Constant qw(
 );
 use Net::LDAP::Entry;
 use Test::Net::LDAP::Mock::Data;
+use Test::Net::LDAP::Util qw(ldap_dn_is);
 
 my $data = Test::Net::LDAP::Mock::Data->new;
 my $mesg;
@@ -27,7 +28,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is($search->entry->get_value('uid'), 'user1');
 
 # newrdn
@@ -42,7 +43,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user2,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user2,dc=example,dc=com');
 is_deeply([sort $search->entry->get_value('uid')], ['user1', 'user2']);
 
 # newrdn, deleteoldrdn
@@ -57,7 +58,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user3,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user3,dc=example,dc=com');
 is_deeply([sort $search->entry->get_value('uid')], ['user1', 'user3']);
 
 # newsuperior
@@ -71,7 +72,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user3,dc=example2,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user3,dc=example2,dc=com');
 is_deeply([sort $search->entry->get_value('uid')], ['user1', 'user3']);
 
 # newsuperior, newrdn
@@ -87,7 +88,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user4,dc=example3,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user4,dc=example3,dc=com');
 is_deeply([sort $search->entry->get_value('uid')], ['user1', 'user4']);
 
 # Callback

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 31;
+use Test::More tests => 35;
 
 use Net::LDAP::Constant qw(
     LDAP_SUCCESS
@@ -12,8 +12,8 @@ use Net::LDAP::Constant qw(
 );
 use Net::LDAP::Entry;
 use Net::LDAP::Util qw(canonical_dn);
-use Test::Net::LDAP::Util qw(ldap_result_is);
 use Test::Net::LDAP::Mock::Data;
+use Test::Net::LDAP::Util qw(ldap_result_is ldap_dn_is);
 
 my $data = Test::Net::LDAP::Mock::Data->new;
 my $search;
@@ -30,7 +30,7 @@ $search = $data->search_ok(
 );
 
 is(scalar($search->entries), 1);
-is($search->entry->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($search->entry->dn, 'uid=user1,dc=example,dc=com');
 is($search->entry->get_value('uid'), 'user1');
 is($search->entry->get_value('sn'), 'User');
 is($search->entry->get_value('cn'), 'One');
@@ -54,15 +54,15 @@ $search = $data->search_ok(
 is(scalar($search->entries), 3);
 
 my @entries = sort {$a->get_value('uid') cmp $b->get_value('uid')} $search->entries;
-is($entries[0]->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($entries[0]->dn, 'uid=user1,dc=example,dc=com');
 is($entries[0]->get_value('uid'), 'user1');
 is($entries[0]->get_value('sn'), 'User');
 is($entries[0]->get_value('cn'), 'One');
-is($entries[1]->dn, 'uid=user2,dc=example,dc=com');
+ldap_dn_is($entries[1]->dn, 'uid=user2,dc=example,dc=com');
 is($entries[1]->get_value('uid'), 'user2');
 is($entries[1]->get_value('sn'), 'User');
 is($entries[1]->get_value('cn'), 'Two');
-is($entries[2]->dn, 'uid=user3,dc=example,dc=com');
+ldap_dn_is($entries[2]->dn, 'uid=user3,dc=example,dc=com');
 is($entries[2]->get_value('uid'), 'user3');
 is($entries[2]->get_value('sn'), 'User');
 is($entries[2]->get_value('cn'), 'Three');
@@ -79,6 +79,17 @@ my $mesg = $data->add_ok('uid=user4, dc=example, dc=com',
 is(scalar(@callback_args), 1);
 is(scalar(@{$callback_args[0]}), 1);
 cmp_ok($callback_args[0][0], '==', $mesg);
+
+# Preserve DN exactly as specified at the time of add()
+$data->add_ok('UID=User5, DC=Example,DC=COM');
+
+$search = $data->search_ok(
+    base => 'dc=example, dc=com', scope => 'one',
+    filter => '(uid=user5)', attrs => [qw(uid)],
+);
+
+is $search->entry->dn, 'UID=User5, DC=Example,DC=COM';
+is $search->entry->get_value('uid'), 'User5';
 
 # Error: dn is missing
 $data->add_is([attrs => [

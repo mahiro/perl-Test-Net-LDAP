@@ -399,8 +399,6 @@ sub add {
         );
     }
     
-    $entry->dn(canonical_dn($dn_list, casefold => 'lower'));
-    
     if (my $rdn = $dn_list->[0]) {
         $entry->delete(%$rdn);
         $entry->add(%$rdn);

@@ -12,6 +12,7 @@ use Net::LDAP::Constant qw(
 );
 use Net::LDAP::Entry;
 use Test::Net::LDAP::Mock::Data;
+use Test::Net::LDAP::Util qw(ldap_dn_is);
 
 my $data = Test::Net::LDAP::Mock::Data->new;
 my $search;
@@ -37,11 +38,11 @@ $search = $data->search_ok(
 
 is(scalar($search->entries), 3);
 @entries = sort {$a->get_value('uid') cmp $b->get_value('uid')} $search->entries;
-is($entries[0]->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($entries[0]->dn, 'uid=user1,dc=example,dc=com');
 is($entries[0]->get_value('uid'), 'user1');
-is($entries[1]->dn, 'uid=user2,dc=example,dc=com');
+ldap_dn_is($entries[1]->dn, 'uid=user2,dc=example,dc=com');
 is($entries[1]->get_value('uid'), 'user2');
-is($entries[2]->dn, 'uid=user3,dc=example,dc=com');
+ldap_dn_is($entries[2]->dn, 'uid=user3,dc=example,dc=com');
 is($entries[2]->get_value('uid'), 'user3');
 
 # Delete user2
@@ -54,9 +55,9 @@ $search = $data->search_ok(
 
 is(scalar($search->entries), 2);
 @entries = sort {$a->get_value('uid') cmp $b->get_value('uid')} $search->entries;
-is($entries[0]->dn, 'uid=user1,dc=example,dc=com');
+ldap_dn_is($entries[0]->dn, 'uid=user1,dc=example,dc=com');
 is($entries[0]->get_value('uid'), 'user1');
-is($entries[1]->dn, 'uid=user3,dc=example,dc=com');
+ldap_dn_is($entries[1]->dn, 'uid=user3,dc=example,dc=com');
 is($entries[1]->get_value('uid'), 'user3');
 
 # Delete user1
@@ -69,7 +70,7 @@ $search = $data->search_ok(
 
 is(scalar($search->entries), 1);
 @entries = sort {$a->get_value('uid') cmp $b->get_value('uid')} $search->entries;
-is($entries[0]->dn, 'uid=user3,dc=example,dc=com');
+ldap_dn_is($entries[0]->dn, 'uid=user3,dc=example,dc=com');
 is($entries[0]->get_value('uid'), 'user3');
 
 # Delete user3

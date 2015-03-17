@@ -5,7 +5,7 @@ use warnings;
 use Test::More tests => 40;
 
 use Net::LDAP;
-use Test::Net::LDAP::Util qw(ldap_mockify);
+use Test::Net::LDAP::Util qw(ldap_mockify ldap_dn_is);
 
 ldap_mockify {
     # ldap1
@@ -19,8 +19,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
     }
     
     # ldap2
@@ -34,8 +34,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user03,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user04,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user03,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user04,dc=example,dc=com';
     }
     
     # ldap1, port 3389
@@ -49,8 +49,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user05,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user06,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user05,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user06,dc=example,dc=com';
     }
     
     # ldap1, ldaps
@@ -64,8 +64,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user07,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user08,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user07,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user08,dc=example,dc=com';
     }
     
     # /tmp/ldap1, ldapi
@@ -79,8 +79,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user09,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user10,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user09,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user10,dc=example,dc=com';
     }
     
     # /tmp/ldap2, ldapi
@@ -94,8 +94,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user11,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user12,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user11,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user12,dc=example,dc=com';
     }
 };
 
@@ -108,8 +108,8 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
     }
 };
 
@@ -123,7 +123,7 @@ ldap_mockify {
         is scalar($search->entries), 2;
         
         my $entries = [sort {$a->dn cmp $b->dn} $search->entries];
-        is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
-        is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
+        ldap_dn_is $entries->[0]->dn, 'uid=user01,dc=example,dc=com';
+        ldap_dn_is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
     }
 };
