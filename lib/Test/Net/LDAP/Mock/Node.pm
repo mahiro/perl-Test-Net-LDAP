@@ -106,14 +106,14 @@ sub _descend_path {
 sub _make_subnode {
     my ($self, $rdn) = @_;
     # E.g. $rdn == {ou => 'Sales'}
-    my $canonical = canonical_dn([$rdn], casefold => 'lower');
+    my $canonical = lc canonical_dn([$rdn], casefold => 'none');
     return $self->{submap}{$canonical} ||= ref($self)->new;
 }
 
 sub _get_subnode {
     my ($self, $rdn) = @_;
     # E.g. $rdn == {ou => 'Sales'}
-    my $canonical = canonical_dn([$rdn], casefold => 'lower');
+    my $canonical = lc canonical_dn([$rdn], casefold => 'none');
     return $self->{submap}{$canonical};
 }
 

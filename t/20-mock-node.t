@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 25;
 
 use Test::Net::LDAP::Mock::Node;
 
@@ -32,3 +32,8 @@ cmp_ok($root->get_node('cn=foo+uid=bar, dc=example, dc=com'), '==', $foobar);
 cmp_ok($root->get_node('uid=bar+cn=foo, dc=example, dc=com'), '==', $foobar);
 is($root->get_node('cn=foo, dc=example, dc=com'), undef);
 is($root->get_node('uid=bar, dc=example, dc=com'), undef);
+
+# DN is case-insensitive
+ok my $example3 = $com->make_node('DC=Example');
+cmp_ok($example, '==', $example3);
+cmp_ok($root->get_node('Dc=EXAMPLE,dC=Com'), '==', $example);
