@@ -119,6 +119,7 @@ the target (host/port/path) and scheme (ldap/ldaps/ldapi).
 =cut
 
 my $mock_map = {};
+my $mock_target;
 
 sub new {
     my $class = shift;
@@ -142,6 +143,24 @@ sub new {
 sub _mock_target {
     my $host = shift if @_ % 2;
     my $arg = &Net::LDAP::_options;
+
+    if ($mock_target) {
+        my ($new_host, $new_arg);
+
+        if (ref $mock_target eq 'CODE') {
+            ($new_host, $new_arg) = $mock_target->($host, $arg);
+        } elsif (ref $mock_target eq 'ARRAY') {
+            ($new_host, $new_arg) = @$mock_target;
+        } elsif (ref $mock_target eq 'HASH') {
+            $new_arg = $mock_target;
+        } else {
+            $new_host = $mock_target;
+        }
+
+        $host = $new_host if defined $new_host;
+        $arg = {%$arg, %$new_arg} if defined $new_arg;
+    }
+
     my $scheme = $arg->{scheme} || 'ldap';
 
     # Net::LDAP->new() can take an array ref as hostnames, where
@@ -152,13 +171,18 @@ sub _mock_target {
     }
     
     if (length $host) {
-        if ($scheme ne 'ldapi' && $host !~ /:\d+$/) {
-            $host .= ':'.($arg->{port} || 389);
+        if ($scheme ne 'ldapi') {
+            if ($arg->{port}) {
+                $host =~ s/:\d+$//;
+                $host .= ":$arg->{port}";
+            } elsif ($host !~ /:\d+$/) {
+                $host .= ":389";
+            }
         }
     } else {
         $host = '';
     }
-    
+
     return "$scheme://$host";
 }
 
@@ -287,6 +311,58 @@ methods are not affected.
 sub mock_password {
     my $self = shift;
     $self->mock_data->mock_password(@_);
+}
+
+=head2 mock_target
+
+Gets or sets the target scheme://host:port to normalize the way for successive
+C<Test::Net::LDAP::Mock> objects to resolve the associated data tree.
+
+It is useful when normalizing the target scheme://host:port for different
+combinations. For example, if there are sub-domains (such as ldap1.example.com
+and ldap2.example.com) that share the same data tree, the target host should be
+normalized to be the single master server (such as ldap.example.com).
+
+    Test::Net::LDAP::Mock->mock_target('ldap.example.com');
+    Test::Net::LDAP::Mock->mock_target('ldap.example.com', port => 3389);
+    Test::Net::LDAP::Mock->mock_target(['ldap.example.com', {port => 3389}]);
+    Test::Net::LDAP::Mock->mock_target({scheme => 'ldaps', port => 3389});
+
+Since this will affect all the successive calls to instantiate C<Test::Net::LDAP::Mock>,
+it may not be ideal when your application uses connections to multiple LDAP
+servers.  In that case, you can specify a callback that will be invoked each
+time a C<Test::Net::LDAP::Mock> object is instantiated.
+
+    Test::Net::LDAP::Mock->mock_target(sub {
+        my ($host, $arg) = @_;
+        # Normalize $host, $arg->{port}, and $arg->{scheme}
+        $host = 'ldap.example1.com' if $host =~ /\.example1\.com$/;
+        $host = 'ldap.example2.com' if $host =~ /\.example2\.com$/;
+        return ($host, $arg);
+    });
+
+=cut
+
+sub mock_target {
+    my $class = shift;
+
+    if (@_) {
+        my $old = $mock_target;
+        my $host = shift;
+
+        if (@_ >= 2) {
+            $mock_target = [$host, {@_}];
+        } elsif (@_ == 1) {
+            my $arg = shift;
+            $mock_target = [$host, $arg];
+        } else {
+            $mock_target = $host;
+        }
+
+        return $old;
+    } else {
+        return $mock_target;
+    }
 }
 
 =head2 search
