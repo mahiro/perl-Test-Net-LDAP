@@ -119,8 +119,12 @@ sub ldap_result_is {
         # CODE
     };
 
-Inside the code block, all the occurrences of C<Net::LDAP::new> are replaced by
-C<Test::Net::LDAP::Mock::new>.
+Inside the code block (recursively), all the occurrences of C<Net::LDAP::new>
+are replaced by C<Test::Net::LDAP::Mock::new>.
+
+Subclasses of C<Net::LDAP> are also mockified. C<Test::Net::LDAP::Mock> is inserted
+into C<@ISA> of each subclass, only within the context of C<ldap_mockify>.
+
 See L<Test::Net::LDAP::Mock> for more details.
 
 =cut
@@ -128,8 +132,7 @@ See L<Test::Net::LDAP::Mock> for more details.
 sub ldap_mockify(&) {
     my ($callback) = @_;
     require Test::Net::LDAP::Mock;
-    local *Net::LDAP::new = *Test::Net::LDAP::Mock::new;
-    $callback->();
+    Test::Net::LDAP::Mock->mockify($callback);
 }
 
 =head2 ldap_dn_is

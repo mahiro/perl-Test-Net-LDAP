@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 40;
+use Test::More tests => 51;
 
 use Net::LDAP;
 use Test::Net::LDAP::Util qw(ldap_mockify ldap_dn_is);
@@ -127,3 +127,61 @@ ldap_mockify {
         ldap_dn_is $entries->[1]->dn, 'uid=user02,dc=example,dc=com';
     }
 };
+
+# Net::LDAP subclasses
+{
+    package Net::LDAP::MySubclass1;
+    use base 'Net::LDAP';
+
+    sub new {
+        my $class = shift;
+        my $self = $class->SUPER::new(@_);
+        $self->{__subclass_test} = ref($self).'::new called';
+        return $self;
+    }
+
+    sub search {
+        my $self = shift;
+        my $mesg = $self->SUPER::search(@_);
+        $mesg->{__subclass_test} = ref($self).'::search called';
+        return $mesg;
+    }
+
+    package Net::LDAP::MySubclass2;
+    use base 'Net::LDAP::MySubclass1';
+
+    sub my_method {
+        my ($self) = @_;
+        return ref($self).'::my_method called';
+    }
+}
+
+ok !'Net::LDAP::MySubclass1'->isa('Test::Net::LDAP::Mock');
+
+ldap_mockify {
+    Net::LDAP::MySubclass1->new('subclass1.example.com');
+    ok 'Net::LDAP::MySubclass1'->isa('Test::Net::LDAP::Mock');
+
+    do {
+        my $ldap = Net::LDAP::MySubclass1->new('subclass1.example.com');
+        is($ldap->{__subclass_test}, 'Net::LDAP::MySubclass1::new called');
+
+        $ldap->add_ok('uid=subclass1, dc=example, dc=com');
+
+        my $mesg = $ldap->search_ok(
+            base => 'dc=example, dc=com', scope => 'one', filter => 'uid=subclass1',
+        );
+
+        is($mesg->{__subclass_test}, 'Net::LDAP::MySubclass1::search called');
+        is($mesg->count, 1);
+    };
+
+    do {
+        my $ldap = Net::LDAP::MySubclass2->new('subclass2.example.com');
+        is($ldap->{__subclass_test}, 'Net::LDAP::MySubclass2::new called');
+        is($ldap->my_method, 'Net::LDAP::MySubclass2::my_method called');
+    };
+};
+
+ok !'Net::LDAP::MySubclass1'->isa('Test::Net::LDAP::Mock');
+ok 'Net::LDAP::MySubclass2'->isa('Net::LDAP::MySubclass1');

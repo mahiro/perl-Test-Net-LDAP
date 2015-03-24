@@ -121,10 +121,23 @@ the target (host/port/path) and scheme (ldap/ldaps/ldapi).
 my $mock_map = {};
 my $mock_target;
 
+my $mockified = 0;
+my @mockified_subclasses;
+
 sub new {
     my $class = shift;
     $class = ref $class || $class;
-    $class = __PACKAGE__ if $class eq 'Net::LDAP'; # special case (ldap_mockify)
+
+    if ($mockified) {
+        if ($class eq 'Net::LDAP') {
+            # Net::LDAP
+            $class = __PACKAGE__;
+        } elsif (!$class->isa(__PACKAGE__)) {
+            # Subclass of Net::LDAP (but not yet of Test::Net::LDAP::Mock)
+            _mockify_subclass($class);
+        }
+    }
+
     my $target = &_mock_target;
     
     my $self = bless {
@@ -138,6 +151,29 @@ sub new {
     });
     
     return $self;
+}
+
+sub _mockify_subclass {
+    my ($class) = @_;
+    no strict 'refs';
+    {
+        unshift @{$class.'::ISA'}, __PACKAGE__;
+    }
+    use strict 'refs';
+
+    push @mockified_subclasses, $class;
+}
+
+sub _unmockify_subclasses {
+    no strict 'refs';
+    {
+        for my $class (@mockified_subclasses) {
+            @{$class.'::ISA'} = grep {$_ ne __PACKAGE__} @{$class.'::ISA'};
+        }
+    }
+    use strict 'refs';
+
+    @mockified_subclasses = ();
 }
 
 sub _mock_target {
@@ -203,6 +239,38 @@ sub _send_mesg {
     my $ldap = shift;
     my $mesg = shift;
     return $mesg;
+}
+
+=head2 mockify
+
+    Test::Net::LDAP::Mock->mockify(sub {
+        # CODE
+    });
+
+Inside the code block (recursively), all the occurrences of C<Net::LDAP::new>
+are replaced by C<Test::Net::LDAP::Mock::new>.
+
+Subclasses of C<Net::LDAP> are also mockified. C<Test::Net::LDAP::Mock> is inserted
+into C<@ISA> of each subclass, only within the context of C<mockify>.
+
+See also: L<Test::Net::LDAP::Util/ldap_mockify>.
+
+=cut
+
+sub mockify {
+    my ($class, $callback) = @_;
+
+    if ($mockified) {
+        $callback->();
+    } else {
+        $mockified = 1;
+        local *Net::LDAP::new = *Test::Net::LDAP::Mock::new;
+        eval {$callback->()};
+        my $error = $@;
+        _unmockify_subclasses();
+        $mockified = 0;
+        die $error if $error;
+    }
 }
 
 =head2 mock_data
