@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 70;
+use Test::More tests => 75;
 
 use Net::LDAP::Constant qw(
     LDAP_SUCCESS LDAP_NO_SUCH_OBJECT
@@ -84,6 +84,18 @@ ldap_dn_is($entries->[3]->dn, 'uid=user4,ou=def,dc=example,dc=com');
 $search = $data->search_ok(
     base => 'dc=example, dc=com', scope => 'sub',
     filter => '(cn=bar)'
+);
+
+$entries = [sort {$a->dn cmp $b->dn} $search->entries];
+is($search->count, 2);
+is(scalar(@$entries), 2);
+ldap_dn_is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
+ldap_dn_is($entries->[1]->dn, 'uid=user4,ou=def,dc=example,dc=com');
+
+# Default scope => 'sub'
+$search = $data->search_ok(
+    base => 'dc=example, dc=com',
+    filter => '(cn=bar)',
 );
 
 $entries = [sort {$a->dn cmp $b->dn} $search->entries];

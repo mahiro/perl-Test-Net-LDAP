@@ -278,7 +278,8 @@ sub search {
         $filter = undef;
     }
     
-    my $scope = $scope{$arg->{scope} || 0};
+    my $scope = defined $arg->{scope} ? $arg->{scope} : 'sub';
+    $scope = $scope{$scope};
     
     unless (defined $scope) {
         return $self->_error($mesg, LDAP_PARAM_ERROR, 'invalid scope');
