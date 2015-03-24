@@ -1,5 +1,9 @@
 Revision history for Test-Net-LDAP
 
+0.07    2015-03-25
+        Bugfix: Handle (attrs => ['*']) correctly in search.
+        TODO: Support operational attributes
+
 0.06    2015-03-24
         Support arbitrary Net::LDAP subclasses.
         Bugfix for default scope in search (should be subtree).
