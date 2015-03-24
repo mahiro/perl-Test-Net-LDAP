@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 75;
+use Test::More tests => 91;
 
 use Net::LDAP::Constant qw(
     LDAP_SUCCESS LDAP_NO_SUCH_OBJECT
@@ -104,7 +104,7 @@ is(scalar(@$entries), 2);
 ldap_dn_is($entries->[0]->dn, 'uid=user2,ou=abc,dc=example,dc=com');
 ldap_dn_is($entries->[1]->dn, 'uid=user4,ou=def,dc=example,dc=com');
 
-# All attributes
+# All attributes (attrs => undef)
 $search = $data->search_ok(
     base => 'ou=abc, dc=example, dc=com', scope => 'one',
     filter => '(uid=user1)'
@@ -114,6 +114,38 @@ $entries = [sort {$a->dn cmp $b->dn} $search->entries];
 is($search->count, 1);
 is(scalar(@$entries), 1);
 ldap_dn_is($entries->[0]->dn, 'uid=user1,ou=abc,dc=example,dc=com');
+$attrs = [sort $entries->[0]->attributes];
+is(scalar(@$attrs), 3);
+is($attrs->[0], 'cn');
+is($attrs->[1], 'sn');
+is($attrs->[2], 'uid');
+is($entries->[0]->get_value('cn'), 'foo');
+is($entries->[0]->get_value('sn'), 'user');
+is($entries->[0]->get_value('uid'), 'user1');
+
+# All attributes (attrs => [])
+$search = $data->search_ok(
+    base => 'ou=abc, dc=example, dc=com', scope => 'one',
+    filter => '(uid=user1)', attrs => []
+);
+
+$entries = [sort {$a->dn cmp $b->dn} $search->entries];
+$attrs = [sort $entries->[0]->attributes];
+is(scalar(@$attrs), 3);
+is($attrs->[0], 'cn');
+is($attrs->[1], 'sn');
+is($attrs->[2], 'uid');
+is($entries->[0]->get_value('cn'), 'foo');
+is($entries->[0]->get_value('sn'), 'user');
+is($entries->[0]->get_value('uid'), 'user1');
+
+# All attributes (attrs => ['*'])
+$search = $data->search_ok(
+    base => 'ou=abc, dc=example, dc=com', scope => 'one',
+    filter => '(uid=user1)', attrs => ['*']
+);
+
+$entries = [sort {$a->dn cmp $b->dn} $search->entries];
 $attrs = [sort $entries->[0]->attributes];
 is(scalar(@$attrs), 3);
 is($attrs->[0], 'cn');

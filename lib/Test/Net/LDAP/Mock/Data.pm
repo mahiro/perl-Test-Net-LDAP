@@ -147,6 +147,7 @@ sub mock_password {
 sub _result_entry {
     my ($self, $input_entry, $arg) = @_;
     my $attrs = $arg->{attrs} || [];
+    $attrs = [] if grep {$_ eq '*'} @$attrs;
     my $output_entry;
     
     if (@$attrs) {
