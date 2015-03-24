@@ -1,5 +1,9 @@
 Revision history for Test-Net-LDAP
 
+0.06    2015-03-24
+        Support arbitrary Net::LDAP subclasses.
+        Bugfix for default scope in search (should be subtree).
+
 0.05    2015-03-18
         Bugfix with case-insensitive DN
         Add mock_target to normalize scheme://host:port
